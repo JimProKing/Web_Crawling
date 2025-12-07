@@ -1,67 +1,59 @@
-# Chapter 06 쇼핑 트렌드 분석
+# 네이버플러스 스토어 쇼핑 트렌드 리포트 자동화 프로젝트
 
-## 📋 실습 개요
-이번 장에서는 **웹 자동화**와 **문서 자동 생성** 기술을 결합하여 쇼핑 트렌드를 분석하고 보고서를 자동으로 생성하는 실무형 프로젝트를 진행합니다.
-- **Playwright**를 활용한 네이버 쇼핑 페이지 자동화 및 데이터 수집
-- **스크린샷 자동 캡처**를 통한 트렌드 정보 시각화
-- **python-docx**로 전문적인 Word 보고서 자동 생성
-- **JSON 데이터 처리**를 통한 체계적인 정보 관리
+Playwright로 네이버플러스 스토어 베스트 상품을 카테고리 + 연령/성별별로 필터링해서  
+인기 상품 이미지를 자동 캡처하고, python-docx로 예쁜 워드 리포트를 만드는 실습 프로젝트입니다.
 
-## ⚙️ 패키지 설치
-실습을 원활하게 진행하기 위해 비주얼 스튜디오 코드 터미널에서 아래 명령어를 실행하여 필요한 파이썬 패키지들을 설치해주세요.
+> 2025년 기준 네이버플러스 스토어는 직접 URL 접속을 차단하므로  
+> 반드시 **네이버 메인 → "스토어" 클릭 → 새 탭 우회 접속** 방식이 필요합니다.
 
-```shell
-pip install -U playwright python-docx
+## 폴더 및 파일 구조
+
+| 파일명                     | 역할 설명                                                                 |
+|---------------------------|--------------------------------------------------------------------------|
+| `step_1_1.py`             | `output` 폴더 자동 생성                                                   |
+| `step_1_2.py`             | 핵심! 네이버 메인 → 스토어 새 탭 우회 접속 함수 (`run_playwright`)         |
+| `step_1_2_inspector.py`   | `with sync_playwright()` 버전 (참고용)                                    |
+| `step_1_3.py`             | 베스트상품 탭으로 이동                                                    |
+| `step_2_1.py`             | 카테고리 선택 + 세부 옵션(연령/성별) 선택 함수                             |
+| `step_2_2.py`             | 현재 페이지의 상품 이미지 캡처 → `step_2_2.json`에 경로 저장               |
+| `step_2_3.py`             | 위 기능들을 하나로 묶은 `fetch_trends_by_filter()` 함수                   |
+| `step_3_1.py`             | python-docx로 제목 + 날짜 넣은 문서 초기화                                 |
+| `step_3_2.py`             | 핵심! 수집한 이미지를 5열 표로 삽입해서 완성된 리포트 생성                 |
+| `step_3_2_table.py`       | python-docx 표 기본 예제 (참고용)                                         |
+| `step_x.py`               | 완성 예제 (현재 `add_table` 함수 없어서 실행 안 됨)                        |
+| `output/`                 | 자동 생성 폴더 → 이미지 파일 + 완성된 `.docx` 파일 들어감                  |
+
+## 실행 전 준비 (필수)
+
+```bash
+# 가상환경 생성 및 활성화
+python -m venv .venv
+source .venv/bin/activate        # Mac/Linux
+# .venv\Scripts\activate         # Windows
 ```
+# 필요 패키지 설치
+pip install playwright python-docx
 
-또한 웹 브라우저 자동화를 위해 최신 크로미움 브라우저를 설치해주세요.
+# 브라우저 설치 (한 번만)
+playwright install chromium
+단계별 실행 순서
+Bashpython step_1_1.py      # output 폴더 생성
+python step_1_2.py      # 스토어 접속 테스트
+python step_1_3.py      # 베스트상품 이동
+python step_2_1.py      # 카테고리/옵션 선택 테스트
+python step_2_2.py      # 이미지 캡처 → step_2_2.json 생성
+python step_2_3.py      # 통합 수집 실행
+python step_3_1.py      # 제목 테스트 → step_3_1.docx 생성
+python step_3_2.py      # 최종 리포트 완성 → step_3_2.docx 생성 (핵심!)
+여러 카테고리 한 번에 리포트 만들기 (step_3_2.py 수정 예시)
+Pythondoc = init_docx()
+add_table(doc, "패션의류", "20대 여성")
+add_table(doc, "패션잡화", "30대 남성")
+add_table(doc, "화장품/미용", "40대 여성")
+doc.save(OUT_DIR / "쇼핑트렌드_종합리포트.docx")
+주의사항
 
-```shell
-playwright install
-```
-
-## ⚠️ 코드 업데이트 안내
-- **2025.08.18 업데이트**: 네이버플러스 스토어 사이트 직접 접근 시 오류가 발생하여 코드를 개선했습니다.
-  - **기존 방식**: `page.goto("https://shopping.naver.com/ns/home")`
-  - **개선된 방식**: 네이버 메인 페이지 → 네이버플러스 스토어 버튼 클릭으로 안전하게 접근
-  - [step_1_2.py](step_1_2.py), [step_1_3.py](step_1_3.py) 파일의 소스 코드가 업데이트되었으니 최신 버전을 확인해 주세요.
-
-## 🚨 중요한 설정 안내 - Playwright Inspector Target
-
-Playwright Inspector를 사용할 때 **반드시 확인해야 할 설정**이 있습니다:
-
-**발생 가능한 문제:**
-- Inspector 실행 시 locator 음영처리가 제대로 되지 않는 현상
-- 녹화된 코드가 Python이 아닌 JavaScript로 생성되는 문제
-
-**원인:** 현재 버전에서는 Python 환경임에도 불구하고 Node.js가 기본값으로 설정되는 버그가 있습니다.
-
-**해결 방법:** Inspector 창 우측 상단의 **'Target' 메뉴**를 클릭하여 Python > **'Pytest'** 또는 **'Library'**를 선택해주세요.
-
-> 📋 **자세한 설정 방법은 [INSPECTOR_TARGET.md](../INSPECTOR_TARGET.md) 파일을 참고하세요!**
-
-## 🚀 실습 단계별 가이드
-
-*   **[step_1_1.py](step_1_1.py)**: 실습 결과물을 저장할 `output` 폴더를 생성하여 기본 작업 환경을 구성합니다.
-
-*   **[step_1_2_inspector.py](step_1_2_inspector.py)**: `Playwright`의 코드 생성기(Inspector)를 실행하는 방법을 학습하는 예제입니다. 네이버 스토어 페이지를 열고 `pause()`를 호출하여 코드 생성기를 활성화하는 과정을 다룹니다.
-
-*   **[step_1_2.py](step_1_2.py)**: `Playwright`를 실행하여 네이버 스토어 페이지로 안전하게 이동하고, "하루 동안 보지 않기" 팝업을 자동으로 처리한 후, 사용자가 직접 웹페이지를 탐색할 수 있도록 `pause()`로 실행을 일시정지합니다.
-
-*   **[step_1_3.py](step_1_3.py)**: `step_1_2.py`에서 작성한 함수를 재사용하여, 네이버 스토어 페이지에서 '베스트상품' 카테고리로 자동 이동하는 단계를 추가합니다.
-
-*   **[step_2_1.py](step_2_1.py)**: '베스트상품' 페이지에서 특정 카테고리(예: "패션의류")와 세부 옵션(예: "10대 여성")을 자동으로 클릭하는 정교한 자동화 함수를 구현합니다.
-
-*   **[step_2_2.py](step_2_2.py)**: 현재 페이지에 표시된 베스트 상품 목록의 스크린샷을 자동으로 캡처하여 `output` 폴더에 개별 이미지 파일로 저장하고, 파일 경로 목록을 JSON 형태로 체계적으로 관리합니다.
-
-*   **[step_2_3.py](step_2_3.py)**: 이전 단계들에서 개발한 함수들을 효과적으로 조합하여, 특정 카테고리와 옵션을 입력받아 쇼핑 트렌드 정보를 자동 수집(스크린샷 저장)하는 완전한 자동화 워크플로우를 완성합니다.
-
-*   **[step_3_1_docx.py](step_3_1_docx.py)**: `python-docx` 라이브러리를 사용하여 간단한 "Hello, World!" 텍스트에 폰트 크기와 굵기 속성을 적용하는 기본적인 문서 서식 설정 방법을 학습합니다.
-
-*   **[step_3_1.py](step_3_1.py)**: `python-docx`를 활용하여 "쇼핑 트렌드 보고서"라는 제목과 현재 날짜가 포함된 전문적인 Word(.docx) 문서를 생성하고 저장하는 과정을 구현합니다.
-
-*   **[step_3_2_table.py](step_3_2_table.py)**: `python-docx`를 사용하여 3x2 크기의 표를 생성하고 셀에 데이터를 입력하는 방법을 익히는 기본 예제입니다.
-
-*   **[step_3_2.py](step_3_2.py)**: `step_2_3.py`로 수집한 상품 이미지(스크린샷)들을 Word 문서 내의 표 구조에 자동으로 삽입하여 시각적으로 매력적인 보고서 내용을 완성합니다.
-
-*   **[step_x.py](step_x.py)**: 전체 과정을 종합하여, 여러 카테고리와 옵션 조합에 대한 포괄적인 쇼핑 트렌드 보고서(.docx)를 각각 자동 생성하는 최종 완성형 스크립트입니다.# Web_Crawling
+pip install docx (X) → 반드시 pip install python-docx (O)
+page.pause() 실행 시 터미널에 > 프롬프트가 뜨면 여기서 locator 테스트 가능
+이미지 경로는 output/step_2_2.json에 저장됨
+네이버플러스 스토어는 직접 URL 접속 불가
