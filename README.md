@@ -1,7 +1,7 @@
 # 네이버플러스 스토어 쇼핑 트렌드 리포트 자동화 프로젝트
 
 Playwright로 네이버플러스 스토어 베스트 상품을 카테고리 + 연령/성별별로 필터링해서  
-인기 상품 이미지를 자동 캡처하고, python-docx로 예쁜 워드 리포트를 만드는 실습 프로젝트입니다.
+인기 상품 이미지를 자동 캡처하고, python-docx로 워드 리포트를 만드는 프로젝트입니다.
 
 > 2025년 기준 네이버플러스 스토어는 직접 URL 접속을 차단하므로  
 > 반드시 **네이버 메인 → "스토어" 클릭 → 새 탭 우회 접속** 방식이 필요합니다.
@@ -34,26 +34,3 @@ source .venv/bin/activate        # Mac/Linux
 # 필요 패키지 설치
 pip install playwright python-docx
 
-# 브라우저 설치 (한 번만)
-playwright install chromium
-단계별 실행 순서
-Bashpython step_1_1.py      # output 폴더 생성
-python step_1_2.py      # 스토어 접속 테스트
-python step_1_3.py      # 베스트상품 이동
-python step_2_1.py      # 카테고리/옵션 선택 테스트
-python step_2_2.py      # 이미지 캡처 → step_2_2.json 생성
-python step_2_3.py      # 통합 수집 실행
-python step_3_1.py      # 제목 테스트 → step_3_1.docx 생성
-python step_3_2.py      # 최종 리포트 완성 → step_3_2.docx 생성 (핵심!)
-여러 카테고리 한 번에 리포트 만들기 (step_3_2.py 수정 예시)
-Pythondoc = init_docx()
-add_table(doc, "패션의류", "20대 여성")
-add_table(doc, "패션잡화", "30대 남성")
-add_table(doc, "화장품/미용", "40대 여성")
-doc.save(OUT_DIR / "쇼핑트렌드_종합리포트.docx")
-주의사항
-
-pip install docx (X) → 반드시 pip install python-docx (O)
-page.pause() 실행 시 터미널에 > 프롬프트가 뜨면 여기서 locator 테스트 가능
-이미지 경로는 output/step_2_2.json에 저장됨
-네이버플러스 스토어는 직접 URL 접속 불가
