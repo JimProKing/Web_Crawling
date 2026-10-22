@@ -3,6 +3,10 @@
 Playwright로 네이버플러스 스토어 베스트 상품을 카테고리 + 연령/성별별로 필터링해서  
 인기 상품 이미지를 자동 캡처하고, python-docx로 워드 리포트를 만드는 프로젝트입니다.
 
+| 분류 | 상태 | 스택 | 바로 보기 |
+| --- | --- | --- | --- |
+| 자동화 · 크롤링 | 완료 | Python · Playwright · python-docx | — |
+
 > 2025년 기준 네이버플러스 스토어는 직접 URL 접속을 차단하므로  
 > 반드시 **네이버 메인 → "스토어" 클릭 → 새 탭 우회 접속** 방식이 필요합니다.
 
@@ -34,3 +38,9 @@ source .venv/bin/activate        # Mac/Linux
 # 필요 패키지 설치
 pip install playwright python-docx
 
+---
+
+**관련 저장소** · [python-data-structures](https://github.com/JimProKing/python-data-structures) · [OCR_Pra](https://github.com/JimProKing/OCR_Pra) · [Card_Log_Practice](https://github.com/JimProKing/Card_Log_Practice) · [market_capitalization_analysis](https://github.com/JimProKing/market_capitalization_analysis)
+
+<sub>[JimProKing](https://github.com/JimProKing) · 이영찬 — 전체 저장소는 프로필의 프로젝트 지도에서 분야별로 볼 수 있습니다.</sub>
+<!-- jpk-footer -->
